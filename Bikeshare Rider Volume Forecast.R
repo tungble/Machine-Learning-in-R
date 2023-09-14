@@ -5,8 +5,9 @@ library(rpart.plot)
 library(Metrics)
 library(caret)
 library(lubridate)
-df = read.csv("C:/Users/bill le/Downloads/machine learning files/train.csv")
+df = read.csv("C:/Users/billl/Documents/School/Babson/Fall 22 Classes/Machine Learning/Bikeshare project/train.csv")
 df$hours = NULL
+View(df)
 # MANAGE
 df$season = as.factor(df$season)
 df$weather = as.factor(df$weather)
@@ -15,12 +16,14 @@ df$holiday= as.factor(df$holiday)
 df$Time = as.factor(df$Time)
 df$Date = mdy(df$Date)
 df$month = month(df$Date, label=T) #change month to factor
-df$weekday = wday(df$Date, label=T) #weekday
 df$registered[df$registered == 0] = 0.1
 df$casual[df$casual == 0] = 0.1 # adding 0.1 to 0
+df$weekday = wday(df$Date, label=TRUE) 
 # PARTITION
+set.seed(1234)
 N = nrow(df) 
 training_size = round(N*0.6)
+set.seed(1234)
 training_cases = sample(N, training_size) 
 training = df[training_cases, ]
 test = df[-training_cases, ]
@@ -81,7 +84,6 @@ model_casual_stack = rpart(casual ~Time +season +holiday +workingday
                       data=train_casual_stack, control=stopping_rules)
 model_casual_stack = easyPrune(model_casual_stack)
 predictions_casual_stack = predict(model_casual_stack, test_casual_stack)
-rpart.plot(model_casual_stack)
 # BUILD RGST_STACK 
 pred_rgst_lm_full = predict(model_lm_rgst, df)
 pred_rgst_rtree_full = predict(model_rtree_rgst, df)
@@ -97,7 +99,6 @@ model_rgst_stack = rpart(registered ~Time +season +holiday +workingday
                          data=train_rgst_stack, control=stopping_rules)
 model_rgst_stack = easyPrune(model_rgst_stack)
 predictions_rgst_stack = predict(model_rgst_stack, test_rgst_stack)
-rpart.plot(model_rgst_stack)
 # PREDICT COUNT_STACK
 predictions_count_stack = predictions_casual_stack + predictions_rgst_stack
 # BENCHMARK COUNT
